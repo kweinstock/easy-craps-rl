@@ -1,0 +1,13 @@
+README.md
+pyproject.toml
+src/easycraps/__init__.py
+src/easycraps/constants.py
+src/easycraps/engine.py
+src/easycraps/table.py
+src/easycraps.egg-info/PKG-INFO
+src/easycraps.egg-info/SOURCES.txt
+src/easycraps.egg-info/dependency_links.txt
+src/easycraps.egg-info/requires.txt
+src/easycraps.egg-info/top_level.txt
+tests/test_engine.py
+tests/test_table.py

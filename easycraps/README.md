@@ -1,0 +1,37 @@
+# easycraps
+
+The Easy Craps game engine as a plain, dependency-free Python library — no
+Gym/Gymnasium, no HTTP required. Built so an RL agent (or a human script)
+can play by calling methods, not by driving a UI:
+
+```python
+import easycraps
+
+table = easycraps.Table(credit=200)
+table.pass_line_bet(5)
+table.field_bet(10)
+
+result = table.roll()
+print(result.ok, result.message)
+print(table.credit, table.point, table.bets)
+```
+
+Install it in editable mode from this directory:
+
+```bash
+pip install -e .
+```
+
+See [`../rl/GETTING_STARTED.md`](../rl/GETTING_STARTED.md) for a full
+walkthrough and [`../docs/RULES.md`](../docs/RULES.md) for the rules every
+method resolves against. This same engine (`easycraps.Game`, the lower-level
+class `Table` wraps) also backs the `backend` HTTP/WebSocket API
+that drives the live web UI — so a `Table` in a script and a browser tab
+pointed at the cabinet are playing by identical rules.
+
+## Tests
+
+```bash
+pip install -e ".[dev]"
+pytest
+```
