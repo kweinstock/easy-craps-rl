@@ -5,6 +5,11 @@ This folder is where RL agents live (one subfolder per person — `Gavin/`,
 `easycraps`, not a Gym/Gymnasium environment — you call methods on a
 `Table` object, the same way a player would push buttons.
 
+Want to see a whole agent end to end before reading the method reference
+below? [`example/`](example) is a complete, runnable, ~100-line tabular
+Q-learning agent — read [`example/README.md`](example/README.md) and
+`example/q_learning_agent.py`.
+
 ## 1. Install the library
 
 `easycraps` lives at [`../easycraps`](../easycraps).
