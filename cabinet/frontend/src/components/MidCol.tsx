@@ -1,6 +1,7 @@
-import BetSpot from "./BetSpot.jsx";
+import BetSpot from "./BetSpot";
+import type { BetAreaProps } from "../types";
 
-export default function MidCol({ state, fire, selectedChip }) {
+export default function MidCol({ state, fire, selectedChip }: BetAreaProps) {
   return (
     <div className="mid-col">
       <div className="ce-stack">

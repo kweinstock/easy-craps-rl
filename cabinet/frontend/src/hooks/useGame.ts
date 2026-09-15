@@ -1,17 +1,25 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { createSession, wsUrl } from "../api/client.js";
+import { createSession, wsUrl } from "../api/client";
+import type { FireTrigger, GameState, TriggerPayload, TriggerResponse } from "../types";
+
+export interface UseGameResult {
+  sessionId: string | null;
+  state: GameState | null;
+  connected: boolean;
+  fire: FireTrigger;
+  selectedChip: number;
+  setSelectedChip: (chip: number) => void;
+}
 
 // Drives one Easy Craps session: opens the session, keeps a live WebSocket
 // connection to it, and exposes fire(trigger, payload) for every button —
 // the same trigger names an RL agent would call over the REST API.
-export function useGame() {
-  const [sessionId, setSessionId] = useState(null);
-  const [state, setState] = useState(null);
+export function useGame(): UseGameResult {
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [state, setState] = useState<GameState | null>(null);
   const [connected, setConnected] = useState(false);
   const [selectedChip, setSelectedChip] = useState(1);
-  const wsRef = useRef(null);
-  const pendingRef = useRef(new Map());
-  const nextIdRef = useRef(1);
+  const wsRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -33,13 +41,13 @@ export function useGame() {
     ws.onclose = () => setConnected(false);
     ws.onerror = () => setConnected(false);
     ws.onmessage = (evt) => {
-      const body = JSON.parse(evt.data);
+      const body: TriggerResponse = JSON.parse(evt.data);
       setState(body.state);
     };
     return () => ws.close();
   }, [sessionId]);
 
-  const fire = useCallback((trigger, payload = {}) => {
+  const fire = useCallback<FireTrigger>((trigger, payload: TriggerPayload = {}) => {
     const ws = wsRef.current;
     if (ws && ws.readyState === WebSocket.OPEN) {
       ws.send(JSON.stringify({ trigger, payload }));

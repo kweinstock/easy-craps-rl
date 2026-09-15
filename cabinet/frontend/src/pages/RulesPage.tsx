@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { marked } from "marked";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "/api";
+const API_BASE: string = import.meta.env.VITE_API_BASE || "/api";
 
 export default function RulesPage() {
-  const [html, setHtml] = useState(null);
-  const [error, setError] = useState(null);
+  const [html, setHtml] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch(`${API_BASE}/rules`)
@@ -14,8 +14,8 @@ export default function RulesPage() {
         if (!res.ok) throw new Error(`Failed to load rulebook (${res.status})`);
         return res.text();
       })
-      .then((md) => setHtml(marked.parse(md)))
-      .catch((err) => setError(err.message));
+      .then((md) => setHtml(marked.parse(md) as string))
+      .catch((err: Error) => setError(err.message));
   }, []);
 
   return (

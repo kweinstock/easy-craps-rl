@@ -1,7 +1,8 @@
-import BetSpot from "./BetSpot.jsx";
-import { HOP_COMBOS } from "../constants.js";
+import BetSpot from "./BetSpot";
+import { HOP_COMBOS } from "../constants";
+import type { BetAreaProps } from "../types";
 
-export default function HopBets({ state, fire, selectedChip }) {
+export default function HopBets({ state, fire, selectedChip }: BetAreaProps) {
   return (
     <div className="hop-grid">
       {HOP_COMBOS.map(([a, b]) => {

@@ -1,6 +1,14 @@
-import { CHIP_VALUES } from "../constants.js";
+import { CHIP_VALUES } from "../constants";
+import type { FireTrigger, GameState } from "../types";
 
-export default function ChipTray({ state, fire, selectedChip, setSelectedChip }) {
+interface ChipTrayProps {
+  state: GameState;
+  fire: FireTrigger;
+  selectedChip: number;
+  setSelectedChip: (chip: number) => void;
+}
+
+export default function ChipTray({ state, fire, selectedChip, setSelectedChip }: ChipTrayProps) {
   const clearLabel = state.bet_log_count === 0 ? "CLEAR\nALL BETS" : "CLEAR\nLAST BET";
   const canRoll = state.total_bets >= state.min_bet;
 

@@ -1,10 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import type { RollResult } from "../types";
 
 const WIN_COUNT_MS = 900;
 const WIN_HOLD_MS = 1200;
 const LOSE_HOLD_MS = 1200;
 const TICK_MS = 16;
+
+interface WinLossOverlayProps {
+  lastRoll: RollResult | null;
+  rollSeq: number;
+}
+
+type Display = { type: "win"; amount: number } | { type: "lose" } | null;
 
 // Flashes a big overlay after each resolved roll: gold text counting up to
 // the amount won, or a plain "YOU LOST" when nothing was won but something
@@ -15,9 +23,9 @@ const TICK_MS = 16;
 // rAF is paused entirely while the tab/pane isn't visible, which would
 // silently swallow the very first frame (and the whole animation) whenever
 // the cabinet isn't the focused tab.
-export default function WinLossOverlay({ lastRoll, rollSeq }) {
-  const [display, setDisplay] = useState(null); // { type: "win", amount } | { type: "lose" }
-  const seenSeq = useRef(null);
+export default function WinLossOverlay({ lastRoll, rollSeq }: WinLossOverlayProps) {
+  const [display, setDisplay] = useState<Display>(null);
+  const seenSeq = useRef<number | null>(null);
 
   useEffect(() => {
     if (rollSeq == null || rollSeq === seenSeq.current) return;

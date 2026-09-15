@@ -1,8 +1,9 @@
-import DiceIcon from "./DiceIcon.jsx";
-import BetSpot from "./BetSpot.jsx";
-import { HARDS } from "../constants.js";
+import DiceIcon from "./DiceIcon";
+import BetSpot from "./BetSpot";
+import { HARDS } from "../constants";
+import type { BetAreaProps } from "../types";
 
-export default function Hardways({ state, fire, selectedChip }) {
+export default function Hardways({ state, fire, selectedChip }: BetAreaProps) {
   return (
     <div className="hardways-grid">
       {HARDS.map((h) => (

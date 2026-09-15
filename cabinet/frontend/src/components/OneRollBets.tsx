@@ -1,17 +1,19 @@
 import { useState } from "react";
-import DiceIcon from "./DiceIcon.jsx";
-import BetSpot from "./BetSpot.jsx";
-import Hardways from "./Hardways.jsx";
-import HopBets from "./HopBets.jsx";
-import { HORN } from "../constants.js";
+import DiceIcon from "./DiceIcon";
+import BetSpot from "./BetSpot";
+import Hardways from "./Hardways";
+import HopBets from "./HopBets";
+import { HORN } from "../constants";
+import type { BetAreaProps } from "../types";
 
-export default function OneRollBets({ state, fire, selectedChip }) {
-  const [tab, setTab] = useState("hardways");
+const HARD_KEYS = ["hard_4", "hard_6", "hard_8", "hard_10"];
+
+export default function OneRollBets({ state, fire, selectedChip }: BetAreaProps) {
+  const [tab, setTab] = useState<"hardways" | "hop">("hardways");
   const hopTotal = Object.entries(state.bets)
     .filter(([k]) => k.startsWith("hop_"))
     .reduce((sum, [, v]) => sum + v, 0);
-  const hardTotal = ["hard_4", "hard_6", "hard_8", "hard_10"]
-    .reduce((sum, k) => sum + (state.bets[k] || 0), 0);
+  const hardTotal = HARD_KEYS.reduce((sum, k) => sum + (state.bets[k] || 0), 0);
 
   return (
     <div className="left-col">

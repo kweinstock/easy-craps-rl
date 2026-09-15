@@ -1,7 +1,8 @@
-import BetSpot from "./BetSpot.jsx";
-import { POINT_NUMBERS, POINT_LABEL, PLACE_PAY } from "../constants.js";
+import BetSpot from "./BetSpot";
+import { POINT_NUMBERS, POINT_LABEL, PLACE_PAY } from "../constants";
+import type { BetAreaProps } from "../types";
 
-export default function PointsRow({ state, fire, selectedChip }) {
+export default function PointsRow({ state, fire, selectedChip }: BetAreaProps) {
   return (
     <>
       <div className="plp-label">PASS LINE POINT</div>

@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 
+interface NumberPromptModalProps {
+  title: string;
+  defaultValue: number;
+  onSubmit: (value: number) => void;
+  onCancel: () => void;
+}
+
 // A touchscreen-friendly stand-in for window.prompt() — native browser
 // dialogs don't render well (or at all) in kiosk/embedded webviews.
 //
@@ -10,7 +17,7 @@ import { createPortal } from "react-dom";
 // overlay nested inside .ctrl-bar no matter what z-index the overlay used
 // locally). A portal escapes that entirely instead of trying to out-stack
 // the rest of the cabinet.
-export default function NumberPromptModal({ title, defaultValue, onSubmit, onCancel }) {
+export default function NumberPromptModal({ title, defaultValue, onSubmit, onCancel }: NumberPromptModalProps) {
   const [value, setValue] = useState(String(defaultValue ?? ""));
 
   function submit() {

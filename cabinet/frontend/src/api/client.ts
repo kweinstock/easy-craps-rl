@@ -1,20 +1,26 @@
 // Thin client over the Easy Craps backend. Every UI action calls fireTrigger()
 // with the same trigger names an RL agent would use — see backend/README.md.
-const API_BASE = import.meta.env.VITE_API_BASE || "/api";
+import type { GameState, NewSessionResponse, TriggerPayload, TriggerResponse } from "../types";
 
-export async function createSession() {
+const API_BASE: string = import.meta.env.VITE_API_BASE || "/api";
+
+export async function createSession(): Promise<NewSessionResponse> {
   const res = await fetch(`${API_BASE}/sessions`, { method: "POST" });
   if (!res.ok) throw new Error(`createSession failed: ${res.status}`);
   return res.json();
 }
 
-export async function getState(sessionId) {
+export async function getState(sessionId: string): Promise<GameState> {
   const res = await fetch(`${API_BASE}/sessions/${sessionId}/state`);
   if (!res.ok) throw new Error(`getState failed: ${res.status}`);
   return res.json();
 }
 
-export async function fireTrigger(sessionId, trigger, payload = {}) {
+export async function fireTrigger(
+  sessionId: string,
+  trigger: string,
+  payload: TriggerPayload = {}
+): Promise<TriggerResponse> {
   const res = await fetch(`${API_BASE}/sessions/${sessionId}/trigger`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -28,7 +34,7 @@ export async function fireTrigger(sessionId, trigger, payload = {}) {
   return body;
 }
 
-export function wsUrl(sessionId) {
+export function wsUrl(sessionId: string): string {
   const httpBase = API_BASE.startsWith("http")
     ? API_BASE
     : `${window.location.origin}${API_BASE}`;

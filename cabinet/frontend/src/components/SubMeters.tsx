@@ -1,4 +1,10 @@
-export default function SubMeters({ state }) {
+import type { GameState } from "../types";
+
+interface SubMetersProps {
+  state: GameState;
+}
+
+export default function SubMeters({ state }: SubMetersProps) {
   return (
     <div className="sub-meters">
       <div className="meter-big">

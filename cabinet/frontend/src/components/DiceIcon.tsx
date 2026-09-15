@@ -1,4 +1,4 @@
-const PIP_MAPS = {
+const PIP_MAPS: Record<number, number[]> = {
   1: [0, 0, 0, 0, 1, 0, 0, 0, 0],
   2: [1, 0, 0, 0, 0, 0, 0, 0, 1],
   3: [1, 0, 0, 0, 1, 0, 0, 0, 1],
@@ -7,7 +7,12 @@ const PIP_MAPS = {
   6: [1, 0, 1, 1, 0, 1, 1, 0, 1],
 };
 
-export default function DiceIcon({ face, small }) {
+interface DiceIconProps {
+  face: number;
+  small?: boolean;
+}
+
+export default function DiceIcon({ face, small }: DiceIconProps) {
   const map = PIP_MAPS[face] || PIP_MAPS[1];
   return (
     <div className={`dice-icon${small ? " sm" : ""}`}>

@@ -1,6 +1,7 @@
-import BetSpot from "./BetSpot.jsx";
+import BetSpot from "./BetSpot";
+import type { BetAreaProps } from "../types";
 
-export default function FieldBlock({ state, fire, selectedChip }) {
+export default function FieldBlock({ state, fire, selectedChip }: BetAreaProps) {
   return (
     <div className="right-col">
       <div className="field-block">

@@ -1,9 +1,15 @@
-import BetSpot from "./BetSpot.jsx";
+import BetSpot from "./BetSpot";
+import type { BetAreaProps } from "../types";
 
 const LOW_NUMS = [2, 3, 4, 5, 6];
 const HIGH_NUMS = [8, 9, 10, 11, 12];
 
-function Pips({ nums, hits }) {
+interface PipsProps {
+  nums: number[];
+  hits: Set<number>;
+}
+
+function Pips({ nums, hits }: PipsProps) {
   return (
     <div className="lr-pips">
       {nums.map((n) => (
@@ -13,7 +19,7 @@ function Pips({ nums, hits }) {
   );
 }
 
-export default function LuckyRoller({ state, fire, selectedChip }) {
+export default function LuckyRoller({ state, fire, selectedChip }: BetAreaProps) {
   const lastRoll = state.last_roll;
   const lowHits = new Set([...(state.lucky_hits.lowrolls || []), ...(state.lucky_hits.rollemall || [])]);
   const highHits = new Set([...(state.lucky_hits.highrolls || []), ...(state.lucky_hits.rollemall || [])]);

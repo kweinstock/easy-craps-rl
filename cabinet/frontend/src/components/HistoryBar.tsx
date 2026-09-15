@@ -1,6 +1,11 @@
-import DiceIcon from "./DiceIcon.jsx";
+import DiceIcon from "./DiceIcon";
+import type { GameState } from "../types";
 
-export default function HistoryBar({ state }) {
+interface HistoryBarProps {
+  state: GameState;
+}
+
+export default function HistoryBar({ state }: HistoryBarProps) {
   const items = [...state.history].reverse().slice(0, 14);
   return (
     <div className="historybar">

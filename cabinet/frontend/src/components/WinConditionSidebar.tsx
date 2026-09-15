@@ -1,9 +1,14 @@
-import { winningNumbersForSpot } from "../constants.js";
+import { winningNumbersForSpot } from "../constants";
+import type { GameState } from "../types";
+
+interface WinConditionSidebarProps {
+  state: GameState;
+}
 
 const NUMS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
-export default function WinConditionSidebar({ state }) {
-  const winningNumbers = new Set();
+export default function WinConditionSidebar({ state }: WinConditionSidebarProps) {
+  const winningNumbers = new Set<number>();
   Object.keys(state.bets).forEach((spotKey) => {
     winningNumbersForSpot(spotKey, state.point).forEach((n) => winningNumbers.add(n));
   });

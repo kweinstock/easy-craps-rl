@@ -1,8 +1,16 @@
 import { useState } from "react";
-import NumberPromptModal from "./NumberPromptModal.jsx";
+import NumberPromptModal from "./NumberPromptModal";
+import type { FireTrigger, GameState } from "../types";
 
-export default function ControlBar({ state, fire }) {
-  const [modal, setModal] = useState(null); // "addFunds" | "minBet" | null
+interface ControlBarProps {
+  state: GameState;
+  fire: FireTrigger;
+}
+
+type ModalKind = "addFunds" | "minBet" | null;
+
+export default function ControlBar({ state, fire }: ControlBarProps) {
+  const [modal, setModal] = useState<ModalKind>(null);
 
   function onHelp() {
     // Help always opens the rulebook — a real route, not just a toast.

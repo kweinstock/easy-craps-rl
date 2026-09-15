@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom";
-import GamePage from "./pages/GamePage.jsx";
-import RulesPage from "./pages/RulesPage.jsx";
+import GamePage from "./pages/GamePage";
+import RulesPage from "./pages/RulesPage";
 
 export default function App() {
   return (

@@ -32,10 +32,10 @@ easy-craps-rl/
     backend/              FastAPI HTTP + WebSocket server over easycraps.
       app/api/
       tests/
-    frontend/              React (Vite) cabinet UI.
+    frontend/              React + TypeScript (Vite) cabinet UI.
       src/components/      One file per button/betting area.
       src/pages/           GamePage (the table) and RulesPage (help -> rulebook).
-      src/hooks/useGame.js WebSocket session hook every component reads from.
+      src/hooks/useGame.ts WebSocket session hook every component reads from.
   assets/                 Original static prototype + art, kept for reference.
   rl/                     RL agents (one subfolder per person) built on easycraps.
 ```
