@@ -109,6 +109,11 @@ table.last_roll    # the RollResult dataclass from the most recent roll, or None
 table.state        # everything above as one dict (same JSON the HTTP API returns)
 ```
 
+Every method, property, and constant above (plus the lower-level `Game`
+class) is documented in full in
+[`../easycraps/docs/api.html`](../easycraps/docs/api.html) — open it in a
+browser for the exhaustive reference.
+
 ## 4. Escape hatch: raw triggers
 
 If you ever need a bet spot or action that doesn't have a named method yet,

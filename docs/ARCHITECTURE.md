@@ -33,7 +33,7 @@ easycraps/                    the rules, once
 
 ### 1. `easycraps/` — the engine, as a library, not an app
 
-[`easycraps/src/easycraps/engine.py`](../easycraps/src/easycraps/engine.py)
+[`easycraps/src/easycraps/engine/`](../easycraps/src/easycraps/engine)
 holds a `Game` class with **zero I/O** — no HTTP, no sockets, no printing.
 It tracks a `GameState` (credit, bets, point, hard-way counters, Lucky
 Roller progress, history) and exposes exactly one entry point:
@@ -52,12 +52,17 @@ underneath, the exact same function call. There's no second code path to
 fall out of sync with the first.
 
 Payout tables and which numbers are points live in
-[`constants.py`](../easycraps/src/easycraps/constants.py), separate from
-the resolution logic in `engine.py`'s `_resolve_roll` — so the *data*
-(what [`RULES.md`](RULES.md) documents) isn't interleaved with the
-*mechanics* (iterate bets, settle, mutate credit).
+[`constants/`](../easycraps/src/easycraps/constants), separate from the
+resolution logic in `engine/resolution.py`'s `resolve_roll()` — so the
+*data* (what [`RULES.md`](RULES.md) documents) isn't interleaved with the
+*mechanics* (iterate bets, settle, mutate credit). Both `constants` and
+`engine` are themselves small subpackages (one file per bet category, one
+file per concern) rather than single monolithic modules — see
+[`easycraps/README.md`](../easycraps/README.md#folder-structure) for the
+full breakdown, or [`easycraps/docs/api.html`](../easycraps/docs/api.html)
+for the exhaustive method-by-method reference.
 
-[`table.py`](../easycraps/src/easycraps/table.py) (`Table`) sits on top of
+[`table/`](../easycraps/src/easycraps/table) (`Table`) sits on top of
 `Game` purely for ergonomics — `table.field_bet(10)` instead of
 `game.apply("place_bet", {"spot": "field", "amount": 10})`. It adds **no**
 new behavior; every method is a one-line call into `Game.apply()`. That
@@ -144,5 +149,5 @@ The net effect: there is one function, `Game.apply()`, and every
 consumer — a button click, a WebSocket message, an HTTP POST, or
 `table.field_bet(10)` in a training loop — eventually calls it with the
 same trigger name and payload. A bug fix or rule change happens in exactly
-one file (`engine.py` / `constants.py`) and is instantly correct
-everywhere else.
+one place (`engine/resolution.py` or the relevant `constants/` file) and
+is instantly correct everywhere else.

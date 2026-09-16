@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>easycraps — API Reference</title>
+<style>
+  :root{
+    --bg:#ffffff; --bg-alt:#f6f7f9; --border:#e3e5e9; --text:#1c1e26; --dim:#5b6270;
+    --accent:#166534; --accent-bg:#ecfdf3; --code-bg:#f3f4f6; --code-text:#1c1e26;
+    --sidebar-bg:#fafbfc; --link:#0e6e3e; --warn-bg:#fff7ed; --warn-border:#fdba74;
+    --tag-bg:#eef2ff; --tag-text:#3730a3; --mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0f1115; --bg-alt:#161923; --border:#2a2e3a; --text:#e6e8ee; --dim:#9aa1b1;
+      --accent:#4ade80; --accent-bg:#0f2a1c; --code-bg:#171b26; --code-text:#dfe3ee;
+      --sidebar-bg:#12141c; --link:#4ade80; --warn-bg:#241c0f; --warn-border:#b06a10;
+      --tag-bg:#1c2340; --tag-text:#9fb0ff;
+    }
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6; font-size:15px;
+  }
+  a{color:var(--link);}
+  code, pre, kbd{font-family:var(--mono);}
+  code{background:var(--code-bg);color:var(--code-text);padding:.15em .4em;border-radius:4px;font-size:.88em;}
+  pre{background:var(--code-bg);color:var(--code-text);padding:14px 16px;border-radius:8px;overflow-x:auto;font-size:.85em;line-height:1.55;border:1px solid var(--border);}
+  pre code{background:none;padding:0;border-radius:0;font-size:1em;}
+  h1,h2,h3,h4{line-height:1.25;scroll-margin-top:20px;}
+  h1{font-size:1.9rem;margin:0 0 6px;}
+  h2{font-size:1.4rem;margin:0 0 14px;padding-top:6px;border-bottom:1px solid var(--border);padding-bottom:10px;}
+  h3{font-size:1.12rem;margin:34px 0 8px;}
+  h4{font-size:.98rem;margin:22px 0 6px;color:var(--text);}
+  p{margin:0 0 12px;}
+  ul,ol{margin:0 0 12px;padding-left:22px;}
+  li{margin-bottom:4px;}
+
+  .layout{display:flex;min-height:100vh;}
+  nav.sidebar{
+    width:260px;flex-shrink:0;background:var(--sidebar-bg);border-right:1px solid var(--border);
+    padding:22px 18px 60px;position:sticky;top:0;height:100vh;overflow-y:auto;
+  }
+  nav.sidebar .brand{font-weight:800;font-size:1.05rem;margin-bottom:2px;}
+  nav.sidebar .brand small{display:block;font-weight:500;color:var(--dim);font-size:.72rem;margin-top:2px;}
+  nav.sidebar .navgroup{margin-top:20px;}
+  nav.sidebar .navgroup h5{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);margin:0 0 6px;font-weight:700;}
+  nav.sidebar a{display:block;color:var(--text);text-decoration:none;font-size:.86rem;padding:4px 8px;border-radius:6px;}
+  nav.sidebar a:hover{background:var(--bg-alt);}
+  nav.sidebar a.method{color:var(--dim);font-family:var(--mono);font-size:.78rem;padding-left:16px;}
+
+  main{flex:1;min-width:0;max-width:880px;padding:42px 48px 120px;}
+  .lede{color:var(--dim);font-size:1.02rem;margin-bottom:26px;}
+  .badge-row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 26px;}
+  .badge{background:var(--accent-bg);color:var(--accent);border-radius:20px;padding:4px 12px;font-size:.72rem;font-weight:700;letter-spacing:.02em;}
+
+  section{margin-bottom:52px;}
+
+  table{width:100%;border-collapse:collapse;margin:14px 0 20px;font-size:.86rem;}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:top;}
+  th{color:var(--dim);font-weight:700;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;}
+  tr:last-child td{border-bottom:none;}
+  td code{white-space:nowrap;}
+
+  .card{
+    border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin:14px 0 22px;background:var(--bg-alt);
+  }
+  .sig{
+    font-family:var(--mono);font-size:.92rem;background:var(--code-bg);border:1px solid var(--border);
+    border-radius:8px;padding:10px 14px;margin:0 0 12px;overflow-x:auto;color:var(--code-text);
+  }
+  .sig .name{color:var(--accent);font-weight:700;}
+  .tag{display:inline-block;background:var(--tag-bg);color:var(--tag-text);font-size:.66rem;font-weight:700;
+       border-radius:5px;padding:2px 7px;margin-left:8px;vertical-align:middle;letter-spacing:.02em;}
+  .note{background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:8px;padding:12px 16px;margin:16px 0;font-size:.88rem;}
+  .note strong{display:block;margin-bottom:2px;}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media (max-width:760px){ .grid2{grid-template-columns:1fr;} }
+
+  .toc-inline{color:var(--dim);font-size:.85rem;}
+  .toc-inline a{margin-right:14px;}
+
+  footer{color:var(--dim);font-size:.8rem;border-top:1px solid var(--border);padding-top:18px;margin-top:60px;}
+
+  @media (max-width:900px){
+    .layout{flex-direction:column;}
+    nav.sidebar{width:100%;height:auto;position:relative;border-right:none;border-bottom:1px solid var(--border);}
+    main{padding:28px 20px 80px;max-width:none;}
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <nav class="sidebar">
+    <div class="brand">easycraps<small>Python library reference</small></div>
+
+    <div class="navgroup">
+      <h5>Start here</h5>
+      <a href="#overview">Overview</a>
+      <a href="#install">Install</a>
+      <a href="#quickstart">Quickstart</a>
+      <a href="#folder-structure">Folder structure</a>
+      <a href="#concepts">Concepts</a>
+    </div>
+
+    <div class="navgroup">
+      <h5>Table class</h5>
+      <a href="#table-constructor">Constructor</a>
+      <a href="#table-properties">Properties</a>
+      <a href="#table-escape-hatch">trigger() / bet()</a>
+      <a href="#table-wagers">Wager methods</a>
+      <a href="#table-controls">Control methods</a>
+    </div>
+
+    <div class="navgroup">
+      <h5>Lower-level API</h5>
+      <a href="#game-class">Game class</a>
+      <a href="#gamestate">GameState</a>
+      <a href="#rollresult">RollResult</a>
+      <a href="#actionresult">ActionResult</a>
+      <a href="#triggererror">TriggerError</a>
+    </div>
+
+    <div class="navgroup">
+      <h5>Reference tables</h5>
+      <a href="#triggers-table">Trigger names</a>
+      <a href="#spot-keys">Bet spot keys</a>
+      <a href="#constants-module">constants module</a>
+      <a href="#payouts">Payout tables</a>
+    </div>
+
+    <div class="navgroup">
+      <h5>Guides</h5>
+      <a href="#errors-vs-rejections">Errors vs. rejections</a>
+      <a href="#determinism">Deterministic rolls</a>
+      <a href="#examples">Worked examples</a>
+    </div>
+  </nav>
+
+  <main>
+
+    <h1 id="overview">easycraps</h1>
+    <p class="lede">The Easy Craps game engine as a plain, dependency-free Python library — no Gym/Gymnasium, no HTTP, no web framework. Everything on this page is the complete public surface of the package: every class, every method, every constant.</p>
+    <div class="badge-row">
+      <span class="badge">Zero dependencies</span>
+      <span class="badge">Python 3.10+</span>
+      <span class="badge">Deterministic dice for tests</span>
+      <span class="badge">Same engine as the live cabinet</span>
+    </div>
+
+    <p>This same engine (<code>easycraps.Game</code>, the lower-level class <code>Table</code> wraps) also backs the <code>cabinet/backend</code> HTTP/WebSocket API that drives the live web UI — so a <code>Table</code> in a script and a browser tab pointed at the cabinet are playing by identical rules. See <a href="../../docs/RULES.md">../../docs/RULES.md</a> for the rules in prose, and <a href="../../rl/GETTING_STARTED.md">../../rl/GETTING_STARTED.md</a> for an agent-building walkthrough. This page is the exhaustive reference; those two are the narrative introductions.</p>
+
+    <h2 id="install">Install</h2>
+    <p>From the <code>easycraps/</code> directory (editable install, so an agent always sees the latest rules):</p>
+    <pre><code>pip install -e .</code></pre>
+    <p>With the test dependencies too:</p>
+    <pre><code>pip install -e ".[dev]"
+pytest</code></pre>
+
+    <h2 id="quickstart">Quickstart</h2>
+    <pre><code>import easycraps
+
+table = easycraps.Table(credit=200)
+table.pass_line_bet(5)
+result = table.roll()
+
+print(result.ok, result.message)
+print(table.credit, table.point, table.bets)</code></pre>
+    <p>That's the whole interaction model: create a <code>Table</code>, call named bet/action methods on it, read its properties back. Every method returns an <a href="#actionresult"><code>ActionResult</code></a>.</p>
+
+    <h2 id="folder-structure">Folder structure</h2>
+    <p>The package is split into three subpackages, each answering one question:</p>
+    <pre><code>easycraps/
+  pyproject.toml
+  README.md
+  docs/
+    api.html            &lt;- this page
+  src/easycraps/
+    __init__.py          Public exports: Table, Game, ActionResult, GameState,
+                          RollResult, TriggerError, constants.
+
+    constants/            "What are the rules?" — pure data, no logic.
+      __init__.py         Re-exports everything flat (C.POINT_NUMBERS still works).
+      points.py           Point numbers, Place bet payouts.
+      field.py             Field / C / E / Any Craps / Any Seven.
+      hardways.py           Hard way combos + payouts.
+      horn.py                Horn number bets + the combined Horn bet.
+      hop.py                  Every two-die combination + hop_key()/hop_pay_for().
+      lucky.py                 Lucky Roller (Low/High/Roll'Em All) needed-sets.
+      settings.py               DEFAULT_MIN_BET.
+
+    engine/               "How does a trigger/roll actually resolve?" — the
+                          low-level, dependency-free simulator.
+      __init__.py         Re-exports Game, GameState, RollResult, TriggerError.
+      errors.py           TriggerError.
+      state.py            GameState + RollResult dataclasses (+ to_dict()).
+      game.py             Game: the named-trigger dispatcher (apply()).
+      resolution.py        resolve_roll(): settles every bet against one roll.
+
+    table/                "How do I use this without thinking about triggers?"
+                          — the friendly Pythonic wrapper most code should use.
+      __init__.py         Re-exports Table, ActionResult, TriggerError.
+      result.py           ActionResult dataclass.
+      core.py             Table: __init__, trigger(), state properties.
+      wagers.py            WagerMixin: every *_bet() method.
+      controls.py           ControlsMixin: add_funds, roll, press, across, ...
+
+  tests/
+    test_engine.py        Tests against the raw Game/trigger API.
+    test_table.py          Tests against the friendly Table API.</code></pre>
+    <p>Nothing outside this package needs to know about that internal split — <code>import easycraps</code> and everything under <a href="#quickstart">Quickstart</a> works the same regardless of which submodule a name actually lives in. The split exists purely to keep each file focused and short enough to read in one sitting.</p>
+
+    <h2 id="concepts">Concepts</h2>
+    <div class="grid2">
+      <div class="card">
+        <strong>Trigger</strong> — a named action ("place_bet", "roll", "press", ...) with a payload dict. It's the one thing everything in this project calls through: a button click in the web UI, an HTTP request, and every <code>Table</code> method all become exactly one <code>Game.apply(trigger, payload)</code> call under the hood.
+      </div>
+      <div class="card">
+        <strong><code>Game</code></strong> — the low-level trigger dispatcher. Holds one <code>GameState</code> and one method, <code>apply()</code>. You normally don't touch this directly.
+      </div>
+      <div class="card">
+        <strong><code>Table</code></strong> — the class you actually use. Wraps a <code>Game</code> and gives every trigger a friendly, discoverable method name (<code>table.field_bet(10)</code> instead of <code>game.apply("place_bet", {"spot": "field", "amount": 10})</code>). Adds zero new behavior over <code>Game</code>.
+      </div>
+      <div class="card">
+        <strong>Bet spot key</strong> — the raw string identifying a bet ("field", "place_6", "hop_43", ...). <code>Table</code>'s named methods build these for you; <a href="#spot-keys">the full list</a> is here if you want to bypass them with <code>table.bet(spot, amount)</code>.
+      </div>
+    </div>
+
+    <hr style="border:none;border-top:1px solid var(--border);margin:44px 0;">
+
+    <h2 id="table-class">Table class</h2>
+    <p>Import as <code>easycraps.Table</code>. This is the class almost everything should use.</p>
+
+    <h3 id="table-constructor">Constructor</h3>
+    <div class="sig"><span class="name">Table</span>(credit: float = 0.0, rng: random.Random | None = None, seed: int | None = None)</div>
+    <table>
+      <tr><th>Parameter</th><th>Type</th><th>Meaning</th></tr>
+      <tr><td><code>credit</code></td><td>float</td><td>Starting bankroll. Equivalent to calling <code>table.add_funds(credit)</code> right after construction.</td></tr>
+      <tr><td><code>rng</code></td><td>random.Random | None</td><td>Bring your own random source (e.g. shared across many tables). Ignored if <code>seed</code> is given.</td></tr>
+      <tr><td><code>seed</code></td><td>int | None</td><td>Shorthand for <code>rng=random.Random(seed)</code> — makes every future random <code>roll()</code> in this table reproducible.</td></tr>
+    </table>
+    <pre><code>table = easycraps.Table(credit=200)
+reproducible = easycraps.Table(credit=200, seed=42)</code></pre>
+
+    <h3 id="table-properties">Properties</h3>
+    <p>All read-only; reflect the table's current state after the most recent method call.</p>
+    <table>
+      <tr><th>Property</th><th>Type</th><th>Meaning</th></tr>
+      <tr><td><code>credit</code></td><td>float</td><td>Current spendable bankroll (not counting active bets).</td></tr>
+      <tr><td><code>bets</code></td><td>dict[str, float]</td><td>Copy of every active bet, keyed by <a href="#spot-keys">spot key</a>.</td></tr>
+      <tr><td><code>total_bet</code></td><td>float</td><td>Sum of <code>bets.values()</code> — what's currently at risk on the table.</td></tr>
+      <tr><td><code>point</code></td><td>int | None</td><td><code>None</code> during a come-out roll, else the established Point number.</td></tr>
+      <tr><td><code>min_bet</code></td><td>float</td><td>The table's current minimum total bet required to <code>roll()</code>.</td></tr>
+      <tr><td><code>message</code></td><td>str</td><td>The same human-readable status text the web UI's message toast shows.</td></tr>
+      <tr><td><code>history</code></td><td>list[tuple[int, int]]</td><td>Every <code>(d1, d2)</code> rolled this session, oldest first.</td></tr>
+      <tr><td><code>last_roll</code></td><td><a href="#rollresult">RollResult</a> | None</td><td>Full detail on the most recent roll, or <code>None</code> before the first roll.</td></tr>
+      <tr><td><code>state</code></td><td>dict</td><td>Everything above (and a bit more — <code>hard_since</code>, <code>lucky_hits</code>, <code>bet_log_count</code>) as one JSON-serializable dict, identical in shape to what the HTTP API returns. Use this if you want the full picture instead of individual properties.</td></tr>
+    </table>
+
+    <h3 id="table-escape-hatch">Escape hatch: <code>trigger()</code> and <code>bet()</code></h3>
+    <div class="sig"><span class="name">trigger</span>(name: str, **payload) -&gt; ActionResult</div>
+    <p>Fires any trigger by name — the exact power-user path the HTTP API uses. Every named method on this page is a one-line wrapper around this call. Use it directly for a trigger that doesn't have a named method yet, or when building payloads programmatically.</p>
+    <pre><code>table.trigger("place_bet", spot="place_6", amount=5)
+table.trigger("across", amount=1)</code></pre>
+
+    <div class="sig"><span class="name">bet</span>(spot: str, amount: float) -&gt; ActionResult</div>
+    <p>Place <code>amount</code> on any raw <a href="#spot-keys">bet-spot key</a>. Every <code>*_bet()</code> method below is a thin wrapper over this.</p>
+    <pre><code>table.bet("field", 10)      # same as table.field_bet(10)
+table.bet("hop_43", 1)      # same as table.hop_bet(4, 3, 1)</code></pre>
+
+    <h3 id="table-wagers">Wager methods</h3>
+    <p>Every method here places a bet and returns an <a href="#actionresult"><code>ActionResult</code></a>. Full payout math is in <a href="#payouts">Payout tables</a> and <a href="../../docs/RULES.md">docs/RULES.md</a>.</p>
+
+    <h4><code>pass_line_bet(amount: float)</code></h4>
+    <p>Pass Line. Wins 1:1 on a come-out 7, or when an established Point repeats before a 7. Loses on seven-out.</p>
+
+    <h4><code>field_bet(amount: float)</code></h4>
+    <p>Field. One roll. Wins on 2, 3, 4, 9, 10, 11, 12 — pays 1:1, except 2 and 12 pay double (2:1).</p>
+
+    <h4><code>low_field_bet(amount: float)</code> / <code>high_field_bet(amount: float)</code></h4>
+    <p>One roll. Low Field wins on 2, 3, 4; High Field wins on 10, 11, 12. Both pay 4:1.</p>
+
+    <h4><code>place_number_bet(number: int, amount: float)</code></h4>
+    <p>Place bet on <code>number</code> — one of 2, 3, 4, 5, 6, 8, 9, 10, 11, 12 (every non-7 number, including 2/3/11/12, which is non-standard for real craps). Wins whenever <code>number</code> is rolled, loses on 7, otherwise stays up.</p>
+    <pre><code>table.place_number_bet(6, 6)   # $6 on the 6</code></pre>
+
+    <h4><code>hard_way_bet(number: int, amount: float)</code></h4>
+    <p>Hard way on <code>number</code> — 4, 6, 8, or 10. Wins only if it comes up as an exact pair (e.g. 3-3 for Hard 6); loses if it comes up "easy" (any other combo summing to it) or on a 7.</p>
+
+    <h4><code>craps_bet(amount: float)</code> — "C"</h4>
+    <p>One roll. Wins on 2, 3, or 12, pays 7:1. Functionally identical to <code>any_craps_bet()</code>.</p>
+
+    <h4><code>eleven_bet(amount: float)</code> — "E"</h4>
+    <p>One roll. Wins on 11, pays 14:1.</p>
+
+    <h4><code>craps_eleven_bet(amount: float)</code> — "C&amp;E"</h4>
+    <p>One roll. Splits the wager in half between Craps (2/3/12, 7:1) and Eleven (11, 14:1); each half resolves independently. Odd amounts round the half down.</p>
+
+    <h4><code>any_craps_bet(amount: float)</code></h4>
+    <p>One roll. Wins on 2, 3, or 12, pays 7:1.</p>
+
+    <h4><code>seven_bet(amount: float)</code></h4>
+    <p>Any-seven. One roll. Wins on 7, pays 4:1.</p>
+
+    <h4><code>horn_number_bet(number: int, amount: float)</code></h4>
+    <p>Single horn number — 2, 3, 11, or 12. One roll. 2/12 pay 30:1, 3/11 pay 15:1.</p>
+
+    <h4><code>horn_bet(amount: float)</code></h4>
+    <p>The combined Horn bet. One roll. Wins flat (3:1 on the whole wager) if the roll is 2, 3, 11, or 12 — a simplified "quick horn," not four separate sub-bets.</p>
+
+    <h4><code>hop_bet(d1: int, d2: int, amount: float)</code></h4>
+    <p>Exact two-die combination on the next roll — e.g. <code>hop_bet(4, 3, 1)</code> bets $1 on the next roll being a 4 and a 3 in either order. Doubles (1-1, 2-2, ...) pay 30:1; non-doubles pay 15:1.</p>
+    <pre><code>table.hop_bet(4, 3, 1)   # wins on either (4,3) or (3,4)
+table.hop_bet(6, 6, 2)   # wins only on double sixes</code></pre>
+
+    <h4><code>lucky_low_bet(amount: float)</code></h4>
+    <p>Lucky Roller — Low Rolls. Every one of {2,3,4,5,6} must appear (any order, any number of rolls) before a 7. Pays 30:1. Multi-roll: stays active across rolls until it resolves.</p>
+
+    <h4><code>lucky_high_bet(amount: float)</code></h4>
+    <p>Lucky Roller — High Rolls. Every one of {8,9,10,11,12} before a 7. Pays 30:1.</p>
+
+    <h4><code>lucky_all_bet(amount: float)</code> — "Roll'Em All"</h4>
+    <p>Lucky Roller — every non-7 total (2,3,4,5,6,8,9,10,11,12) before a 7. Pays 155:1.</p>
+
+    <h3 id="table-controls">Control methods</h3>
+
+    <h4><code>add_funds(amount: float)</code></h4>
+    <p>Deposit credit. <code>amount</code> must be positive.</p>
+
+    <h4><code>cashout()</code></h4>
+    <p>Zero out <code>credit</code> (a "ticket printed" for the current balance). Rejected (<code>ok=False</code>) if any bets are still active or credit is already zero.</p>
+
+    <h4><code>set_min_bet(amount: float)</code></h4>
+    <p>Set the table minimum total bet required for <code>roll()</code> to proceed. This is table configuration, not really a player action — most agents won't call it.</p>
+
+    <h4><code>reset(keep_credit: float = 0.0)</code></h4>
+    <p>Starts a brand-new session on this <code>Table</code> (fresh <code>GameState</code>), optionally keeping some credit. Everything else — bets, point, history, hard-way counters, Lucky Roller progress — is wiped.</p>
+
+    <h4><code>clear_last_bet()</code></h4>
+    <p>Undoes the most recent <code>bet</code>/<code>*_bet()</code> call made since the last roll. Rejected if nothing was placed this turn.</p>
+
+    <h4><code>clear_all_bets()</code></h4>
+    <p>Returns every currently active bet's stake to <code>credit</code>. Rejected if there are no bets on the table.</p>
+
+    <h4><code>double_bet()</code></h4>
+    <p>Doubles every currently active bet, in place. Rejected if there's nothing to double or not enough credit to cover it.</p>
+
+    <h4><code>repeat_last_bet()</code></h4>
+    <p>Re-places whatever combination of bets was on the table for the previous resolved roll. Rejected if there's no previous bet or not enough credit.</p>
+
+    <h4><code>toggle_set_bets()</code></h4>
+    <p>Toggles whether Place and Hard Way bets are "working" on the next roll. When off, they neither win nor lose on that roll's resolution.</p>
+
+    <h4><code>press(spot: str | None = None)</code></h4>
+    <p>Re-bets the current stake onto <code>spot</code>, doubling it in place — most commonly used to press a Place bet's winnings back onto itself. If <code>spot</code> is omitted, defaults to the Place bet on the currently established Point. Rejected if there's no bet there yet or not enough credit.</p>
+    <pre><code>table.press()              # press the Point's Place bet
+table.press("place_6")     # press a specific spot explicitly</code></pre>
+
+    <h4><code>toggle_puck()</code></h4>
+    <p>Cosmetic manual "OFF" toggle for the puck marker — only usable while no Point is established (<code>table.point is None</code>). Rejected otherwise.</p>
+
+    <h4><code>roll(d1: int | None = None, d2: int | None = None)</code></h4>
+    <p>Resolves a roll: settles every active bet against the dice, updates the Point, and appends to <code>history</code>. Omit both arguments for random dice; pass them for deterministic/replayable rolls (see <a href="#determinism">Deterministic rolls</a>). Rejected if there are no bets on the table, or the total is below <code>min_bet</code>.</p>
+    <pre><code>table.roll()               # random dice
+table.roll(d1=3, d2=4)     # forces a 7</code></pre>
+
+    <hr style="border:none;border-top:1px solid var(--border);margin:44px 0;">
+
+    <h2 id="game-class">Game class</h2>
+    <p>Import as <code>easycraps.Game</code>. The low-level trigger dispatcher <code>Table</code> is built on. Use this directly only if you specifically want the raw dict-based trigger interface (e.g. building your own wrapper, or mirroring exactly what the HTTP API sends).</p>
+
+    <div class="sig"><span class="name">Game</span>(rng: random.Random | None = None)</div>
+    <p>Constructs a fresh session with an empty <code>GameState</code> (zero credit).</p>
+
+    <div class="sig">.<span class="name">apply</span>(trigger: str, payload: dict | None = None) -&gt; dict</div>
+    <p>Dispatches a named trigger (see <a href="#triggers-table">Trigger names</a>). Returns a plain dict: <code>{"ok": bool, "message": str, "state": dict}</code> — the exact JSON shape the HTTP API's <code>POST /sessions/{id}/trigger</code> returns. Raises <a href="#triggererror"><code>TriggerError</code></a> for programmer errors (unknown trigger name, invalid bet spot, non-positive amount); returns <code>ok: False</code> for valid-but-rejected actions.</p>
+    <pre><code>from easycraps import Game
+
+game = Game()
+game.apply("add_funds", {"amount": 100})
+game.apply("place_bet", {"spot": "field", "amount": 10})
+result = game.apply("roll", {})
+print(result["ok"], result["message"])</code></pre>
+
+    <table>
+      <tr><th>Attribute</th><th>Type</th><th>Meaning</th></tr>
+      <tr><td><code>state</code></td><td><a href="#gamestate">GameState</a></td><td>The live, mutable session state. <code>Table</code> reads this for every property.</td></tr>
+      <tr><td><code>rng</code></td><td>random.Random</td><td>The random source used for dice when <code>roll</code> isn't given explicit <code>d1</code>/<code>d2</code>.</td></tr>
+      <tr><td><code>trigger_names</code></td><td>list[str]</td><td>Property — every valid trigger name, for introspection.</td></tr>
+    </table>
+
+    <h2 id="gamestate">GameState</h2>
+    <p>Import as <code>easycraps.GameState</code>. A dataclass — the complete mutable state of one session. Read via <code>game.state</code> / <code>table.state</code> (as a dict via <code>.to_dict()</code>, which is what <code>Table.state</code> calls for you).</p>
+    <table>
+      <tr><th>Field</th><th>Type</th><th>Meaning</th></tr>
+      <tr><td><code>credit</code></td><td>float</td><td>Current bankroll not tied up in bets.</td></tr>
+      <tr><td><code>bets</code></td><td>dict[str, float]</td><td>Active bets by spot key.</td></tr>
+      <tr><td><code>last_bets</code></td><td>dict[str, float]</td><td>Snapshot of <code>bets</code> right after the most recent roll — what <code>repeat_last_bet</code> replays.</td></tr>
+      <tr><td><code>bet_log</code></td><td>list[tuple[str, float]]</td><td>Bets placed since the last roll, in order — what <code>clear_last_bet</code> pops from.</td></tr>
+      <tr><td><code>point</code></td><td>int | None</td><td>Established Point, or <code>None</code> on a come-out roll.</td></tr>
+      <tr><td><code>min_bet</code></td><td>float</td><td>Current table minimum (default 3.0).</td></tr>
+      <tr><td><code>set_bets_on</code></td><td>bool</td><td>Whether Place/Hard Way bets are "working."</td></tr>
+      <tr><td><code>puck_manual_off</code></td><td>bool</td><td>Cosmetic manual puck-off flag.</td></tr>
+      <tr><td><code>hard_since</code></td><td>dict[int, int]</td><td>Rolls elapsed since each hard-way number last hit, keyed 4/6/8/10.</td></tr>
+      <tr><td><code>lucky_hits</code></td><td>dict[str, set[int]]</td><td>Numbers already rolled toward each active Lucky Roller bet ("lowrolls"/"rollemall"/"highrolls").</td></tr>
+      <tr><td><code>history</code></td><td>list[tuple[int, int]]</td><td>Every <code>(d1, d2)</code> rolled, oldest first.</td></tr>
+      <tr><td><code>last_roll</code></td><td><a href="#rollresult">RollResult</a> | None</td><td>Detail on the most recent roll.</td></tr>
+      <tr><td><code>message</code></td><td>str</td><td>Latest human-readable status text.</td></tr>
+      <tr><td><code>rolling</code></td><td>bool</td><td>Reserved re-entrancy guard; always <code>False</code> between calls (this library is synchronous).</td></tr>
+    </table>
+    <p><code>total_bets() -&gt; float</code> — sum of <code>bets.values()</code>. <code>to_dict() -&gt; dict</code> — the full JSON-serializable snapshot (rounds every dollar figure to 2 decimals, truncates <code>history</code> to the last 20 rolls, adds a computed <code>total_bets</code> and <code>bet_log_count</code>).</p>
+
+    <h2 id="rollresult">RollResult</h2>
+    <p>Import as <code>easycraps.RollResult</code>. A dataclass describing exactly what one roll did. <code>table.last_roll</code> / <code>game.state.last_roll</code> holds the most recent one.</p>
+    <table>
+      <tr><th>Field</th><th>Type</th><th>Meaning</th></tr>
+      <tr><td><code>d1</code>, <code>d2</code></td><td>int</td><td>The two dice.</td></tr>
+      <tr><td><code>total</code></td><td>int</td><td><code>d1 + d2</code>.</td></tr>
+      <tr><td><code>winnings</code></td><td>float</td><td>Total credited back this roll across every bet that won (win amount plus returned stake).</td></tr>
+      <tr><td><code>resolved</code></td><td>dict[str, float]</td><td>Winning bet keys mapped to their payout.</td></tr>
+      <tr><td><code>lost_keys</code></td><td>list[str]</td><td>Bet keys that lost this roll.</td></tr>
+      <tr><td><code>point_before</code></td><td>int | None</td><td>The Point before this roll was resolved.</td></tr>
+      <tr><td><code>point_after</code></td><td>int | None</td><td>The Point after — compare to <code>point_before</code> to detect "Point established," "Point made," or "seven-out."</td></tr>
+      <tr><td><code>message</code></td><td>str</td><td>The status text this roll produced.</td></tr>
+    </table>
+
+    <h2 id="actionresult">ActionResult</h2>
+    <p>Import as <code>easycraps.ActionResult</code>. What every <code>Table</code> method returns.</p>
+    <table>
+      <tr><th>Field</th><th>Type</th><th>Meaning</th></tr>
+      <tr><td><code>ok</code></td><td>bool</td><td>Whether the action actually happened.</td></tr>
+      <tr><td><code>message</code></td><td>str</td><td>Human-readable outcome — identical text the web UI's message toast shows.</td></tr>
+      <tr><td><code>state</code></td><td>dict</td><td>Full state snapshot immediately after this action (same shape as <code>table.state</code>).</td></tr>
+    </table>
+    <p><code>ActionResult</code> is also truthy/falsy based on <code>ok</code>, so you can write:</p>
+    <pre><code>if not table.field_bet(10):
+    print("bet was rejected:", table.message)</code></pre>
+
+    <h2 id="triggererror">TriggerError</h2>
+    <p>Import as <code>easycraps.TriggerError</code> (subclass of <code>ValueError</code>). Raised for <em>programmer</em> errors — an unknown trigger name, an invalid bet-spot key, or a non-positive amount where one is required. See <a href="#errors-vs-rejections">Errors vs. rejections</a> for how this differs from a normal <code>ok=False</code> result.</p>
+
+    <hr style="border:none;border-top:1px solid var(--border);margin:44px 0;">
+
+    <h2 id="triggers-table">Trigger names</h2>
+    <p>What <code>Table</code>'s methods call underneath, and what <code>Game.apply()</code> / the HTTP API accept directly.</p>
+    <table>
+      <tr><th>Trigger</th><th>Payload</th><th>Table method(s)</th></tr>
+      <tr><td><code>add_funds</code></td><td><code>{amount}</code></td><td><code>add_funds(amount)</code></td></tr>
+      <tr><td><code>place_bet</code></td><td><code>{spot, amount}</code></td><td><code>bet(spot, amount)</code> and every <code>*_bet()</code> method</td></tr>
+      <tr><td><code>clear_last_bet</code></td><td><code>{}</code></td><td><code>clear_last_bet()</code></td></tr>
+      <tr><td><code>clear_all_bets</code></td><td><code>{}</code></td><td><code>clear_all_bets()</code></td></tr>
+      <tr><td><code>double_bet</code></td><td><code>{}</code></td><td><code>double_bet()</code></td></tr>
+      <tr><td><code>repeat_last_bet</code></td><td><code>{}</code></td><td><code>repeat_last_bet()</code></td></tr>
+      <tr><td><code>toggle_set_bets</code></td><td><code>{}</code></td><td><code>toggle_set_bets()</code></td></tr>
+      <tr><td><code>press</code></td><td><code>{spot?}</code></td><td><code>press(spot=None)</code></td></tr>
+      <tr><td><code>across</code></td><td><code>{amount}</code></td><td><code>across(amount)</code></td></tr>
+      <tr><td><code>toggle_puck</code></td><td><code>{}</code></td><td><code>toggle_puck()</code></td></tr>
+      <tr><td><code>cashout</code></td><td><code>{}</code></td><td><code>cashout()</code></td></tr>
+      <tr><td><code>set_min_bet</code></td><td><code>{amount}</code></td><td><code>set_min_bet(amount)</code></td></tr>
+      <tr><td><code>roll</code></td><td><code>{d1?, d2?}</code></td><td><code>roll(d1=None, d2=None)</code></td></tr>
+      <tr><td><code>reset</code></td><td><code>{keep_credit?}</code></td><td><code>reset(keep_credit=0.0)</code></td></tr>
+    </table>
+
+    <h2 id="spot-keys">Bet spot keys</h2>
+    <p>The raw string identifiers used by <code>place_bet</code> / <code>table.bet()</code>. <code>&lt;n&gt;</code> is a point number, <code>&lt;ab&gt;</code> is two die faces.</p>
+    <table>
+      <tr><th>Key</th><th>Bet</th><th>Named method</th></tr>
+      <tr><td><code>pass</code></td><td>Pass Line</td><td><code>pass_line_bet</code></td></tr>
+      <tr><td><code>field</code></td><td>Field</td><td><code>field_bet</code></td></tr>
+      <tr><td><code>lowfield</code></td><td>Low Field</td><td><code>low_field_bet</code></td></tr>
+      <tr><td><code>highfield</code></td><td>High Field</td><td><code>high_field_bet</code></td></tr>
+      <tr><td><code>c</code></td><td>"C" (Craps)</td><td><code>craps_bet</code></td></tr>
+      <tr><td><code>e</code></td><td>"E" (Eleven)</td><td><code>eleven_bet</code></td></tr>
+      <tr><td><code>ce</code></td><td>"C&amp;E" split</td><td><code>craps_eleven_bet</code></td></tr>
+      <tr><td><code>anycraps</code></td><td>Any Craps</td><td><code>any_craps_bet</code></td></tr>
+      <tr><td><code>seven</code></td><td>Any Seven</td><td><code>seven_bet</code></td></tr>
+      <tr><td><code>horn</code></td><td>Combined Horn</td><td><code>horn_bet</code></td></tr>
+      <tr><td><code>place_&lt;n&gt;</code></td><td>Place bet on <code>n</code> (2,3,4,5,6,8,9,10,11,12)</td><td><code>place_number_bet(n, amt)</code></td></tr>
+      <tr><td><code>hard_&lt;n&gt;</code></td><td>Hard way on <code>n</code> (4,6,8,10)</td><td><code>hard_way_bet(n, amt)</code></td></tr>
+      <tr><td><code>horn_&lt;n&gt;</code></td><td>Single horn number (2,3,11,12)</td><td><code>horn_number_bet(n, amt)</code></td></tr>
+      <tr><td><code>hop_&lt;ab&gt;</code></td><td>Exact combo, e.g. <code>hop_43</code></td><td><code>hop_bet(4, 3, amt)</code></td></tr>
+      <tr><td><code>lowrolls</code></td><td>Lucky Roller — Low Rolls</td><td><code>lucky_low_bet</code></td></tr>
+      <tr><td><code>rollemall</code></td><td>Lucky Roller — Roll'Em All</td><td><code>lucky_all_bet</code></td></tr>
+      <tr><td><code>highrolls</code></td><td>Lucky Roller — High Rolls</td><td><code>lucky_high_bet</code></td></tr>
+    </table>
+
+    <h2 id="constants-module">constants module</h2>
+    <p>Import as <code>from easycraps import constants as C</code> (or <code>easycraps.constants</code>). Pure data — every payout table and winning-number set the engine resolves against, re-exported flat regardless of which internal submodule (<code>points.py</code>, <code>field.py</code>, ...) actually defines it.</p>
+    <table>
+      <tr><th>Name</th><th>Type</th><th>Meaning</th></tr>
+      <tr><td><code>POINT_NUMBERS</code></td><td>list[int]</td><td><code>[2,3,4,5,6,8,9,10,11,12]</code> — every number that can become the Point.</td></tr>
+      <tr><td><code>POINT_LABEL</code></td><td>dict[int,str]</td><td>Display label per point number (6 → "SIX", 9 → "NINE", others numeric).</td></tr>
+      <tr><td><code>PLACE_PAY</code></td><td>dict[int,tuple]</td><td>number → <code>(a, b)</code> meaning it pays <code>(a-b):b</code>; <code>a/b</code> is the total-return multiplier.</td></tr>
+      <tr><td><code>place_return_multiplier(number)</code></td><td>function → float</td><td><code>PLACE_PAY[number]</code> as a single total-return multiplier.</td></tr>
+      <tr><td><code>FIELD_WINNERS</code></td><td>tuple[int]</td><td>Totals the Field bet wins on.</td></tr>
+      <tr><td><code>FIELD_DOUBLE_WINNERS</code></td><td>tuple[int]</td><td><code>(2, 12)</code> — Field totals that pay double.</td></tr>
+      <tr><td><code>FIELD_PAY_FOR</code> / <code>FIELD_DOUBLE_PAY_FOR</code></td><td>int</td><td>Total-return multiplier for a normal (2) vs. doubled (3) Field win.</td></tr>
+      <tr><td><code>LOW_FIELD_WINNERS</code> / <code>HIGH_FIELD_WINNERS</code></td><td>tuple[int]</td><td>Totals each side bet wins on.</td></tr>
+      <tr><td><code>LOW_FIELD_PAY_FOR</code> / <code>HIGH_FIELD_PAY_FOR</code></td><td>int</td><td>Total-return multiplier for each (5 = 4:1).</td></tr>
+      <tr><td><code>C_WINNERS</code> / <code>C_PAY_FOR</code></td><td>tuple / int</td><td>"C" wins on <code>(2,3,12)</code>, multiplier 8 (7:1).</td></tr>
+      <tr><td><code>E_WINNERS</code> / <code>E_PAY_FOR</code></td><td>tuple / int</td><td>"E" wins on <code>(11,)</code>, multiplier 15 (14:1).</td></tr>
+      <tr><td><code>ANY_CRAPS_WINNERS</code> / <code>ANY_CRAPS_PAY_FOR</code></td><td>tuple / int</td><td><code>(2,3,12)</code>, multiplier 8 (7:1).</td></tr>
+      <tr><td><code>ANY_SEVEN_PAY_FOR</code></td><td>int</td><td>5 (4:1) — Any Seven's multiplier.</td></tr>
+      <tr><td><code>HARDS</code></td><td>dict[int,dict]</td><td>4/6/8/10 → <code>{"combo": (d1,d2), "pay_for": multiplier}</code>.</td></tr>
+      <tr><td><code>HORN_NUMBERS</code></td><td>dict[int,dict]</td><td>2/3/11/12 → <code>{"combo": (d1,d2), "pay_for": multiplier}</code> for the single horn-number bets.</td></tr>
+      <tr><td><code>HORN_BET_PAY_FOR</code> / <code>HORN_BET_WINNERS</code></td><td>int / tuple</td><td>Multiplier (4 = 3:1) and winning totals for the combined Horn bet.</td></tr>
+      <tr><td><code>HOP_COMBOS</code></td><td>list[tuple]</td><td>All 21 unique two-die combinations, e.g. <code>(1,1)</code> ... <code>(6,6)</code>.</td></tr>
+      <tr><td><code>hop_key(a, b)</code></td><td>function → str</td><td>Builds the canonical <code>hop_&lt;ab&gt;</code> spot key (sorted, so order doesn't matter).</td></tr>
+      <tr><td><code>hop_pay_for(a, b)</code></td><td>function → int</td><td>31 for doubles (30:1), 16 for non-doubles (15:1).</td></tr>
+      <tr><td><code>LUCKY_LOW_NEEDED</code> / <code>LUCKY_HIGH_NEEDED</code> / <code>LUCKY_ALL_NEEDED</code></td><td>frozenset[int]</td><td>The set of totals each Lucky Roller bet needs to see before a 7.</td></tr>
+      <tr><td><code>LUCKY_PAY_FOR</code></td><td>dict[str,int]</td><td><code>"lowrolls"</code>/<code>"highrolls"</code> → 31 (30:1), <code>"rollemall"</code> → 156 (155:1).</td></tr>
+      <tr><td><code>DEFAULT_MIN_BET</code></td><td>float</td><td>3.0 — the minimum total bet a fresh <code>Table</code>/<code>Game</code> starts with.</td></tr>
+    </table>
+
+    <h2 id="payouts">Payout tables</h2>
+    <p>Same numbers as <a href="#constants-module">constants module</a> above, in "win : stake" form for quick reference. Full prose rules (round structure, what "total return" means, hard-way resolution, etc.) are in <a href="../../docs/RULES.md">docs/RULES.md</a>.</p>
+    <table>
+      <tr><th>Bet</th><th>Wins on</th><th>Pays</th></tr>
+      <tr><td>Pass Line</td><td>come-out 7, or Point repeats</td><td>1 : 1</td></tr>
+      <tr><td>Place 2 / 12</td><td>the number</td><td>11 : 2</td></tr>
+      <tr><td>Place 3 / 11</td><td>the number</td><td>11 : 4</td></tr>
+      <tr><td>Place 4 / 10</td><td>the number</td><td>9 : 5</td></tr>
+      <tr><td>Place 5 / 9</td><td>the number</td><td>7 : 5</td></tr>
+      <tr><td>Place 6 / 8</td><td>the number</td><td>7 : 6</td></tr>
+      <tr><td>Field</td><td>2,3,4,9,10,11,12</td><td>1 : 1 (2:1 on 2 &amp; 12)</td></tr>
+      <tr><td>Low Field / High Field</td><td>2,3,4 / 10,11,12</td><td>4 : 1</td></tr>
+      <tr><td>C (Craps)</td><td>2, 3, 12</td><td>7 : 1</td></tr>
+      <tr><td>E (Eleven)</td><td>11</td><td>14 : 1</td></tr>
+      <tr><td>Any Craps</td><td>2, 3, 12</td><td>7 : 1</td></tr>
+      <tr><td>Any Seven</td><td>7</td><td>4 : 1</td></tr>
+      <tr><td>Horn number 2 / 12</td><td>the number</td><td>30 : 1</td></tr>
+      <tr><td>Horn number 3 / 11</td><td>the number</td><td>15 : 1</td></tr>
+      <tr><td>Combined Horn bet</td><td>2, 3, 11, 12</td><td>3 : 1 (flat)</td></tr>
+      <tr><td>Hop, doubles</td><td>exact pair, e.g. 3-3</td><td>30 : 1</td></tr>
+      <tr><td>Hop, non-doubles</td><td>exact combo, either order</td><td>15 : 1</td></tr>
+      <tr><td>Hard 4 / 10</td><td>exact pair (2-2 / 5-5)</td><td>7 : 1</td></tr>
+      <tr><td>Hard 6 / 8</td><td>exact pair (3-3 / 4-4)</td><td>9 : 1</td></tr>
+      <tr><td>Lucky Roller — Low / High</td><td>all 5 needed totals before a 7</td><td>30 : 1</td></tr>
+      <tr><td>Lucky Roller — Roll'Em All</td><td>all 10 non-7 totals before a 7</td><td>155 : 1</td></tr>
+    </table>
+
+    <hr style="border:none;border-top:1px solid var(--border);margin:44px 0;">
+
+    <h2 id="errors-vs-rejections">Errors vs. rejections</h2>
+    <p>Two different failure modes, on purpose:</p>
+    <ul>
+      <li><strong>Raises <code>TriggerError</code></strong> — you (the programmer) did something invalid: an unknown trigger name, a bet-spot key that doesn't exist, a negative/zero amount where a positive one is required. These are bugs in the calling code, so they're exceptions, not silent failures.</li>
+      <li><strong>Returns <code>ActionResult(ok=False, ...)</code></strong> — the action was well-formed but rejected for a normal game reason: not enough credit, rolling before the table minimum is met, trying to cash out with bets still active, pressing a spot with nothing on it, etc. Exactly what a human player would see as a rejected action, not a bug.</li>
+    </ul>
+    <pre><code>try:
+    table.bet("not_a_real_spot", 5)
+except easycraps.TriggerError as exc:
+    print("programmer error:", exc)
+
+result = table.pass_line_bet(1_000_000)  # more than table.credit
+if not result.ok:
+    print("rejected, not an error:", result.message)</code></pre>
+
+    <h2 id="determinism">Deterministic rolls</h2>
+    <p>Two independent ways to make outcomes reproducible:</p>
+    <ol>
+      <li><strong>Seed the table</strong> — <code>Table(seed=42)</code> makes every future random <code>roll()</code> reproducible across runs.</li>
+      <li><strong>Force specific dice</strong> — <code>table.roll(d1=3, d2=4)</code> ignores randomness entirely and resolves exactly that roll. This is how <code>easycraps/tests/test_engine.py</code> and <code>test_table.py</code> pin down every scenario (come-out seven, seven-out, a specific hard-way hit, ...).</li>
+    </ol>
+    <pre><code># Force a seven-out from an established point:
+table.pass_line_bet(10)
+table.roll(d1=2, d2=2)      # point = 4
+table.roll(d1=3, d2=4)      # 7 -> seven-out, deterministic</code></pre>
+
+    <h2 id="examples">Worked examples</h2>
+
+    <h3>A minimal round</h3>
+    <pre><code>import easycraps
+
+table = easycraps.Table(credit=100)
+table.set_min_bet(1)          # table defaults to $3; lower it for small examples
+table.pass_line_bet(5)
+result = table.roll()
+
+print(result.message)
+# "Point is SIX. Anything but 7 keeps it alive."
+# or "7 on the come-out — Pass Line wins! Place a new Pass Line bet."</code></pre>
+
+    <h3>Reading full state instead of properties</h3>
+    <pre><code>table.field_bet(10)
+table.roll()
+print(table.state)
+# {'credit': ..., 'bets': {...}, 'total_bets': ..., 'point': ...,
+#  'min_bet': 1.0, 'set_bets_on': True, 'puck_manual_off': False,
+#  'hard_since': {'4': 4, '6': 2, '8': 80, '10': 94},
+#  'lucky_hits': {'lowrolls': [], 'rollemall': [], 'highrolls': []},
+#  'history': [[3, 5]], 'bet_log_count': 0,
+#  'message': '...', 'last_roll': {...}}</code></pre>
+
+    <h3>A tiny agent loop</h3>
+    <p>See <a href="../../rl/example/q_learning_agent.py">rl/example/q_learning_agent.py</a> for a complete runnable Q-learning agent built on exactly this API. The core loop:</p>
+    <pre><code>table = easycraps.Table(credit=200)
+table.set_min_bet(1)
+
+for _ in range(60):
+    if table.credit + table.total_bet <= 0:
+        break
+    before = table.credit + table.total_bet
+    table.field_bet(1)
+    table.roll()
+    reward = (table.credit + table.total_bet) - before
+    # ... feed `reward` and whatever state you chose to your learner ...</code></pre>
+
+    <h3>Using the raw Game/trigger API directly</h3>
+    <pre><code>from easycraps import Game, TriggerError
+
+game = Game(rng=None)
+game.apply("add_funds", {"amount": 50})
+game.apply("place_bet", {"spot": "hard_6", "amount": 1})
+try:
+    game.apply("place_bet", {"spot": "nope", "amount": 1})
+except TriggerError as exc:
+    print(exc)
+
+result = game.apply("roll", {"d1": 3, "d2": 3})   # forces a hard 6
+print(result["state"]["credit"])</code></pre>
+
+    <footer>
+      easycraps — part of the <a href="../../README.md">Easy Craps RL</a> project.
+      See also <a href="../../docs/RULES.md">docs/RULES.md</a> (the rules in prose),
+      <a href="../../docs/ARCHITECTURE.md">docs/ARCHITECTURE.md</a> (why the project is split this way), and
+      <a href="../../rl/GETTING_STARTED.md">rl/GETTING_STARTED.md</a> (building an agent).
+    </footer>
+
+  </main>
+</div>
+</body>
+</html>

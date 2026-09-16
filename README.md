@@ -69,10 +69,11 @@ result = table.roll()
 print(result.message, table.credit, table.point)
 ```
 
-See [`rl/GETTING_STARTED.md`](rl/GETTING_STARTED.md) for the full method
-list, [`easycraps/README.md`](easycraps/README.md) for install
-instructions, and [`docs/RULES.md`](docs/RULES.md) for the payouts those
-methods resolve. A non-Python agent (or one that must run out-of-process)
+See [`rl/GETTING_STARTED.md`](rl/GETTING_STARTED.md) for a walkthrough,
+[`easycraps/docs/api.html`](easycraps/docs/api.html) for the exhaustive API
+reference (every class, method, and constant), and
+[`docs/RULES.md`](docs/RULES.md) for the payouts those methods resolve.
+A non-Python agent (or one that must run out-of-process)
 drives the exact same triggers over HTTP instead — `POST /sessions`, then
 `POST /sessions/{id}/trigger` against the cabinet backend — see
 [`cabinet/backend/README.md`](cabinet/backend/README.md).

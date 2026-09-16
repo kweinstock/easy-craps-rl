@@ -1,0 +1,18 @@
+"""Field / C / E / Any Craps / Any Seven — the one-roll bets."""
+
+FIELD_WINNERS = (2, 3, 4, 9, 10, 11, 12)
+FIELD_DOUBLE_WINNERS = (2, 12)
+FIELD_PAY_FOR = 2  # 1:1 total return
+FIELD_DOUBLE_PAY_FOR = 3  # 2:1 total return
+LOW_FIELD_WINNERS = (2, 3, 4)
+HIGH_FIELD_WINNERS = (10, 11, 12)
+LOW_FIELD_PAY_FOR = 5
+HIGH_FIELD_PAY_FOR = 5
+
+C_WINNERS = (2, 3, 12)
+C_PAY_FOR = 8
+E_WINNERS = (11,)
+E_PAY_FOR = 15
+ANY_CRAPS_WINNERS = (2, 3, 12)
+ANY_CRAPS_PAY_FOR = 8
+ANY_SEVEN_PAY_FOR = 5

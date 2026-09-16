@@ -1,86 +1,23 @@
-"""Easy Craps game engine — the low-level trigger dispatcher.
+"""Game — the low-level trigger dispatcher.
 
 Every player/dealer action is implemented as a named "trigger" dispatched
 through `Game.apply()`. Most code should use the friendlier `Table` class in
 `easycraps.table` instead; `Game` is the one integration point everything
 else (the web UI's HTTP API, `Table`, any other language's agent talking
 over HTTP) calls through, so behavior never drifts between "playing the
-game" and "training on the game".
+game" and "training on the game". Roll resolution itself lives in
+`resolution.py`, kept separate so this file is just the dispatch table and
+the simple (non-roll) triggers.
 """
 from __future__ import annotations
 
 import random
-from dataclasses import dataclass, field
 from typing import Any, Callable
 
-from . import constants as C
-
-
-class TriggerError(ValueError):
-    """Raised when a trigger is called with an invalid name or payload."""
-
-
-@dataclass
-class RollResult:
-    d1: int
-    d2: int
-    total: int
-    winnings: float
-    resolved: dict[str, float]  # bet key -> net credit change (win incl. stake, or 0)
-    lost_keys: list[str]
-    point_before: int | None
-    point_after: int | None
-    message: str
-
-
-@dataclass
-class GameState:
-    credit: float = 0.0
-    bets: dict[str, float] = field(default_factory=dict)
-    last_bets: dict[str, float] = field(default_factory=dict)
-    bet_log: list[tuple[str, float]] = field(default_factory=list)
-    point: int | None = None
-    min_bet: float = C.DEFAULT_MIN_BET
-    set_bets_on: bool = True
-    puck_manual_off: bool = False
-    hard_since: dict[int, int] = field(default_factory=lambda: {4: 4, 6: 2, 8: 80, 10: 94})
-    lucky_hits: dict[str, set[int]] = field(
-        default_factory=lambda: {"lowrolls": set(), "rollemall": set(), "highrolls": set()}
-    )
-    history: list[tuple[int, int]] = field(default_factory=list)
-    last_roll: RollResult | None = None
-    message: str = "Place your Pass Line bet to start the come-out roll."
-    rolling: bool = False
-
-    def total_bets(self) -> float:
-        return sum(self.bets.values())
-
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "credit": round(self.credit, 2),
-            "bets": {k: round(v, 2) for k, v in self.bets.items()},
-            "total_bets": round(self.total_bets(), 2),
-            "point": self.point,
-            "min_bet": self.min_bet,
-            "set_bets_on": self.set_bets_on,
-            "puck_manual_off": self.puck_manual_off,
-            "hard_since": dict(self.hard_since),
-            "lucky_hits": {k: sorted(v) for k, v in self.lucky_hits.items()},
-            "history": self.history[-20:],
-            "bet_log_count": len(self.bet_log),
-            "message": self.message,
-            "last_roll": None
-            if self.last_roll is None
-            else {
-                "dice": [self.last_roll.d1, self.last_roll.d2],
-                "total": self.last_roll.total,
-                "winnings": round(self.last_roll.winnings, 2),
-                "resolved": {k: round(v, 2) for k, v in self.last_roll.resolved.items()},
-                "lost_keys": self.last_roll.lost_keys,
-                "point_before": self.last_roll.point_before,
-                "point_after": self.last_roll.point_after,
-            },
-        }
+from .. import constants as C
+from .errors import TriggerError
+from .resolution import resolve_roll
+from .state import GameState
 
 
 class Game:
@@ -307,172 +244,9 @@ class Game:
         d1, d2 = int(d1), int(d2)
         total_pips = d1 + d2
 
-        result = self._resolve_roll(d1, d2, total_pips)
+        result = resolve_roll(s, d1, d2, total_pips)
         s.last_roll = result
         s.history.append((d1, d2))
         s.last_bets = dict(s.bets)
         s.bet_log = []
         return True, result.message
-
-    # ------------------------------------------------------------ resolving
-    def _resolve_roll(self, d1: int, d2: int, total: int) -> RollResult:
-        s = self.state
-        resolved: dict[str, float] = {}
-        lost: list[str] = []
-        winnings = 0.0
-
-        def settle(key: str, won: bool, pay_for: int) -> None:
-            nonlocal winnings
-            amt = s.bets.get(key)
-            if not amt:
-                return
-            if won:
-                payout = amt * pay_for
-                s.credit += payout
-                winnings += payout
-                resolved[key] = payout
-            else:
-                lost.append(key)
-            del s.bets[key]
-
-        settle(
-            "field",
-            total in C.FIELD_WINNERS,
-            C.FIELD_DOUBLE_PAY_FOR if total in C.FIELD_DOUBLE_WINNERS else C.FIELD_PAY_FOR,
-        )
-        settle("lowfield", total in C.LOW_FIELD_WINNERS, C.LOW_FIELD_PAY_FOR)
-        settle("highfield", total in C.HIGH_FIELD_WINNERS, C.HIGH_FIELD_PAY_FOR)
-        settle("c", total in C.C_WINNERS, C.C_PAY_FOR)
-        settle("e", total in C.E_WINNERS, C.E_PAY_FOR)
-        settle("anycraps", total in C.ANY_CRAPS_WINNERS, C.ANY_CRAPS_PAY_FOR)
-        settle("seven", total == 7, C.ANY_SEVEN_PAY_FOR)
-        settle("horn", total in C.HORN_BET_WINNERS, C.HORN_BET_PAY_FOR)
-        for n, info in C.HORN_NUMBERS.items():
-            settle(f"horn_{n}", total == n, info["pay_for"])
-
-        ce_amt = s.bets.get("ce")
-        if ce_amt:
-            half = ce_amt // 2 if ce_amt == int(ce_amt) else ce_amt / 2
-            won = 0.0
-            if total in C.C_WINNERS:
-                won = half * C.C_PAY_FOR
-            elif total in C.E_WINNERS:
-                won = half * C.E_PAY_FOR
-            if won > 0:
-                s.credit += won
-                winnings += won
-                resolved["ce"] = won
-            else:
-                lost.append("ce")
-            del s.bets["ce"]
-
-        for a, b in C.HOP_COMBOS:
-            key = C.hop_key(a, b)
-            hit = (d1, d2) in ((a, b), (b, a))
-            settle(key, hit, C.hop_pay_for(a, b))
-
-        for n, info in C.HARDS.items():
-            key = f"hard_{n}"
-            amt = s.bets.get(key)
-            hit_hard = (d1, d2) == info["combo"] or (d2, d1) == info["combo"]
-            if not amt:
-                if not hit_hard:
-                    s.hard_since[n] += 1
-                else:
-                    s.hard_since[n] = 0
-                continue
-            if hit_hard:
-                payout = amt * info["pay_for"]
-                s.credit += payout
-                winnings += payout
-                resolved[key] = payout
-                del s.bets[key]
-                s.hard_since[n] = 0
-            elif total == 7 or total == n:
-                lost.append(key)
-                del s.bets[key]
-                s.hard_since[n] += 1
-            else:
-                s.hard_since[n] += 1
-
-        if s.set_bets_on:
-            for n in C.POINT_NUMBERS:
-                key = f"place_{n}"
-                amt = s.bets.get(key)
-                if not amt:
-                    continue
-                if total == n:
-                    payout = amt * C.place_return_multiplier(n)
-                    s.credit += payout
-                    winnings += payout
-                    resolved[key] = payout
-                    del s.bets[key]
-                elif total == 7:
-                    lost.append(key)
-                    del s.bets[key]
-
-        for name, needed in (
-            ("lowrolls", C.LUCKY_LOW_NEEDED),
-            ("rollemall", C.LUCKY_ALL_NEEDED),
-            ("highrolls", C.LUCKY_HIGH_NEEDED),
-        ):
-            amt = s.bets.get(name)
-            if not amt:
-                continue
-            if total == 7:
-                lost.append(name)
-                del s.bets[name]
-                s.lucky_hits[name] = set()
-                continue
-            if total in needed:
-                s.lucky_hits[name].add(total)
-            if needed.issubset(s.lucky_hits[name]):
-                payout = amt * C.LUCKY_PAY_FOR[name]
-                s.credit += payout
-                winnings += payout
-                resolved[name] = payout
-                del s.bets[name]
-                s.lucky_hits[name] = set()
-        if total == 7:
-            for name in ("lowrolls", "rollemall", "highrolls"):
-                s.lucky_hits[name] = set()
-
-        point_before = s.point
-        pass_amt = s.bets.get("pass", 0)
-        if s.point is None:
-            if total == 7:
-                if pass_amt:
-                    payout = pass_amt * 2
-                    s.credit += payout
-                    winnings += payout
-                    resolved["pass"] = payout
-                    del s.bets["pass"]
-                message = "7 on the come-out — Pass Line wins! Place a new Pass Line bet."
-            else:
-                s.point = total
-                s.puck_manual_off = False
-                message = f"Point is {C.POINT_LABEL[total]}. Anything but 7 keeps it alive."
-        else:
-            if total == s.point:
-                if pass_amt:
-                    payout = pass_amt * 2
-                    s.credit += payout
-                    winnings += payout
-                    resolved["pass"] = payout
-                    del s.bets["pass"]
-                message = f"Point {C.POINT_LABEL[s.point]} repeats — Pass Line wins! New come-out roll."
-                s.point = None
-            elif total == 7:
-                if pass_amt:
-                    lost.append("pass")
-                    del s.bets["pass"]
-                message = "Seven out. Pass Line & Place bets lose. New come-out roll."
-                s.point = None
-            else:
-                message = f"Point is still {C.POINT_LABEL[s.point]} — roll again."
-
-        return RollResult(
-            d1=d1, d2=d2, total=total, winnings=winnings, resolved=resolved,
-            lost_keys=lost, point_before=point_before, point_after=s.point,
-            message=message,
-        )

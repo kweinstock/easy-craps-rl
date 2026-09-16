@@ -3,7 +3,7 @@
 Easy Craps is a simplified craps variant designed for a single-player cabinet.
 It removes several bets found at a standard craps table and adds a few
 cabinet-only side bets. This document is the single source of truth for the
-rules — the [game engine](../easycraps/src/easycraps/engine.py) implements
+rules — the [game engine](../easycraps/src/easycraps/engine) implements
 exactly what's described here, and both the web UI and Python agents are
 built on top of it.
 

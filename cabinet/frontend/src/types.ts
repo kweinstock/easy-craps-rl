@@ -1,7 +1,7 @@
 // Mirrors the JSON shapes from cabinet/backend/app/api/main.py and
-// easycraps/src/easycraps/engine.py (GameState.to_dict / RollResult). Keep
-// this in sync with the backend — it's the one contract the whole frontend
-// is typed against.
+// easycraps/src/easycraps/engine/state.py (GameState.to_dict / RollResult).
+// Keep this in sync with the backend — it's the one contract the whole
+// frontend is typed against.
 
 export interface RollResult {
   dice: [number, number];

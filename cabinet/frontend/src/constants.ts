@@ -1,4 +1,4 @@
-// Mirrors easycraps/src/easycraps/constants.py — display data only.
+// Mirrors easycraps/src/easycraps/constants/ — display data only.
 // The backend/easycraps library is the source of truth for actual
 // payouts/resolution.
 
